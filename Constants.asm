@@ -132,6 +132,8 @@ flashtime:	equ $30	; time between flashes after getting hit
 invtime:	equ $32	; time left for invincibility
 shoetime:	equ $34	; time left for speed shoes
 stick_to_convex:equ objoff_38
+spindash_flag:	equ $39	; spin dash flag
+spindash_counter:	equ $3A	; spin dash counter
 standonobject:	equ $3D	; object Sonic stands on
 
 ; Miscellaneous object scratch-RAM
@@ -347,6 +349,12 @@ fr_Float6:	equ $54
 fr_Injury:	equ $55
 fr_GetAir:	equ $56
 fr_WaterSlide:	equ $57
+fr_Spindash1:	equ $58
+fr_Spindash2:	equ $59
+fr_Spindash3:	equ $5A
+fr_Spindash4:	equ $5B
+fr_Spindash5:	equ $5C
+fr_Spindash6:	equ $5D
 
 ; Boss locations
 ; The main values are based on where the camera boundaries mainly lie

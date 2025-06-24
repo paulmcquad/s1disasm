@@ -4,6 +4,31 @@
     "node": "da472ab9-f363-45e6-8ee3-a83fd70d6d9c",
     "objects": [
         {
+            "format": "Sonic 1.js",
+            "name": "Spin Dash",
+            "palettes": [
+                {
+                    "path": "palette/Sonic.bin",
+                    "length": 1
+                }
+            ],
+            "art": {
+                "path": "spindash/Sonic's art.bin",
+                "compression": "Uncompressed",
+                "offset": 0
+            },
+            "mappings": {
+                "path": "spindash/Sonic.asm",
+                "label": ""
+            },
+            "dplcs": {
+                "enabled": true,
+                "path": "spindash/SonicDPLC.asm",
+                "label": ""
+            },
+            "uuid": "2dc329f3-7a11-458b-a071-77207101910d"
+        },
+        {
             "name": "Common",
             "children": [
                 {
@@ -283,7 +308,7 @@
                 }
             ],
             "isDirectory": true,
-            "expanded": false,
+            "expanded": true,
             "uuid": "14da472a-b9f3-4355-a6ce-e3a83fd70d6d"
         },
         {
