@@ -6,22 +6,22 @@
 
 
 Sonic_SpinDash:
-		tst.b	spindash_flag(a0)
-		bne.s	Sonic_UpdateSpindash
-		cmpi.b	#id_Duck,obAnim(a0)
-		bne.s	return_1AC8C
-		move.b	(v_jpadpress2).w,d0
-		andi.b	#btnB|btnC|btnA,d0
-		beq.w	return_1AC8C
-		move.b	#id_Spindash,obAnim(a0)
-		move.w	#sfx_Roll,d0
-		jsr	(PlaySound_Special).l
-		addq.l	#4,sp
-		move.b	#1,spindash_flag(a0)
-		move.w	#0,spindash_counter(a0)
+		tst.b	spindash_flag(a0)	; already Spin Dashing?
+		bne.s	Sonic_UpdateSpindash	; if set, branch
+		cmpi.b	#id_Duck,obAnim(a0)	; is anim duck?
+		bne.s	return_1AC8C	; if not, return
+		move.b	(v_jpadpress2).w,d0	; read controller
+		andi.b	#btnB|btnC|btnA,d0	; pressing A/B/C ?
+		beq.w	return_1AC8C	; if not, return
+		move.b	#id_Spindash,obAnim(a0)	; set Spin Dash anim (9 in s2)
+		move.w	#sfx_Roll,d0	; spin sound ($E0 in s2)
+		jsr	(PlaySound_Special).l		; play spin sound
+		addq.l	#4,sp		; increment stack ptr
+		move.b	#1,spindash_flag(a0)	; set Spin Dash flag
+		move.w	#0,spindash_counter(a0)	; set charge count to 0
 		cmpi.b	#12,obSubtype(a0)	; if he's drowning, branch to not make dust
 		blo.s	+
-		move.b	#2,(v_spindust+obAnim).w
+		move.b	#2,(v_spindust+obAnim).w ; set Spin Dash dust anim to 2
 +
 		bsr.w	Sonic_LevelBound
 		bsr.w	Sonic_AnglePos
@@ -39,40 +39,40 @@ return_1AC8C:
 
 
 Sonic_UpdateSpindash:
-		move.b	(v_jpadhold2).w,d0
-		btst	#bitDn,d0
-		bne.w	Sonic_ChargingSpindash
+		move.b	(v_jpadhold2).w,d0	; read controller
+		btst	#bitDn,d0			; check down button
+		bne.w	Sonic_ChargingSpindash	; if set, branch
 
 		; unleash the charged spindash and start rolling quickly:
-		move.b	#$E,obHeight(a0)
-		move.b	#7,obWidth(a0)
-		move.b	#id_Spindash,obAnim(a0)
+		move.b	#$E,obHeight(a0)	; obHeight(a0) is height/2
+		move.b	#7,obWidth(a0)		; obWidth(a0) is width/2
+		move.b	#id_Roll,obAnim(a0)	; set animation to roll
 		addq.w	#5,obY(a0)	; add the difference between Sonic's rolling and standing heights
-		move.b	#0,spindash_flag(a0)
+		move.b	#0,spindash_flag(a0)	; clear Spin Dash flag
 		moveq	#0,d0
-		move.b	spindash_counter(a0),d0
-		add.w	d0,d0
-		move.w	SpindashSpeeds(pc,d0.w),obInertia(a0)
+		move.b	spindash_counter(a0),d0	; copy charge count
+		add.w	d0,d0	; double it
+		move.w	SpindashSpeeds(pc,d0.w),obInertia(a0)	; get spindash speed
 
 		; Determine how long to lag the camera for.
 		; Notably, the faster Sonic goes, the less the camera lags.
 		; This is seemingly to prevent Sonic from going off-screen.
-		move.w	obInertia(a0),d0
+		move.w	obInertia(a0),d0	; get inertia
 		subi.w	#$800,d0 ; $800 is the lowest spin dash speed
-		add.w	d0,d0
+		add.w	d0,d0	; double it
 		andi.w	#$1F00,d0 ; This line is not necessary, as none of the removed bits are ever set in the first place
-		neg.w	d0
-		addi.w	#$2000,d0
-		move.w	d0,($FFFFEED0).w
+		neg.w	d0		; negate it
+		addi.w	#$2000,d0	; add $2000
+		move.w	d0,($FFFFEED0).w	; move to $EED0
 
-		btst	#0,obStatus(a0)
-		beq.s	+
-		neg.w	obInertia(a0)
+		btst	#0,obStatus(a0)	; is sonic facing right?
+		beq.s	+		; if not, branch
+		neg.w	obInertia(a0)	; negate inertia
 +
-		bset	#2,obStatus(a0)
-		move.b	#0,(v_spindust+obAnim).w
+		bset	#2,obStatus(a0)	; set unused (in s1) flag
+		move.b	#0,(v_spindust+obAnim).w	; clear Spin Dash dust anim
 		move.w	#sfx_Teleport,d0	; spindash zoom sound
-		jsr	(PlaySound_Special).l
+		jsr	(PlaySound_Special).l	; play it!
 		bra.s	Sonic_Spindash_ResetScr
 ; ===========================================================================
 SpindashSpeeds:
@@ -88,28 +88,28 @@ SpindashSpeeds:
 ; ===========================================================================
 
 Sonic_ChargingSpindash:			; If still charging the dash...
-		tst.w	spindash_counter(a0)
-		beq.s	+
-		move.w	spindash_counter(a0),d0
-		lsr.w	#5,d0
-		sub.w	d0,spindash_counter(a0)
-		bcc.s	+
-		move.w	#0,spindash_counter(a0)
+		tst.w	spindash_counter(a0)	; check charge count
+		beq.s	+				; if zero, branch
+		move.w	spindash_counter(a0),d0	; otherwise put it in d0
+		lsr.w	#5,d0			; shift right 5 (divide it by 32)
+		sub.w	d0,spindash_counter(a0)	; subtract from charge count
+		bcc.s	+				; ??? branch if carry clear
+		move.w	#0,spindash_counter(a0)	; set charge count to 0
 +
-		move.b	(v_jpadpress2).w,d0
-		andi.b	#btnB|btnC|btnA,d0
-		beq.w	Sonic_Spindash_ResetScr
-		move.w	#(id_Spindash<<8)|(id_Walk<<0),obAnim(a0)
-		move.w	#sfx_Roll,d0
-		jsr	(PlaySound_Special).l
-		addi.w	#$200,spindash_counter(a0)
-		cmpi.w	#$800,spindash_counter(a0)
-		blo.s	Sonic_Spindash_ResetScr
-		move.w	#$800,spindash_counter(a0)
+		move.b	(v_jpadpress2).w,d0	; read controller
+		andi.b	#btnB|btnC|btnA,d0	; pressing A/B/C?
+		beq.w	Sonic_Spindash_ResetScr	; if not, branch
+		move.w	#(id_Spindash<<8)|(id_Walk<<0),obAnim(a0)	; reset spindash animation
+		move.w	#sfx_Roll,d0	; was $E0 in sonic 2
+		jsr	(PlaySound_Special).l	; play charge sound
+		addi.w	#$200,spindash_counter(a0)	; increase charge count
+		cmpi.w	#$800,spindash_counter(a0)	; check if it's maxed
+		blo.s	Sonic_Spindash_ResetScr	; if not, then branch
+		move.w	#$800,spindash_counter(a0)	; reset it to max
 
 Sonic_Spindash_ResetScr:
-		addq.l	#4,sp
-		cmpi.w	#(224/2)-16,($FFFFEED8).w
+		addq.l	#4,sp		; increase stack ptr
+		cmpi.w	#(224/2)-16,($FFFFEED8).w	; $EED8 only ever seems to be used in Spin Dash
 		beq.s	loc_1AD8C
 		bhs.s	+
 		addq.w	#4,($FFFFEED8).w
@@ -118,6 +118,6 @@ Sonic_Spindash_ResetScr:
 loc_1AD8C:
 		bsr.w	Sonic_LevelBound
 		bsr.w	Sonic_AnglePos
-		move.w	#$60,(v_lookshift).w
+		move.w	#$60,(v_lookshift).w	; reset looking up/down
 		rts
 ; End of function Sonic_UpdateSpindash
