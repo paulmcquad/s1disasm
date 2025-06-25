@@ -39,6 +39,7 @@ return_1AC8C:
 
 
 Sonic_UpdateSpindash:
+		move.b	#id_Spindash,obAnim(a0)
 		move.b	(v_jpadhold2).w,d0	; read controller
 		btst	#bitDn,d0			; check down button
 		bne.w	Sonic_ChargingSpindash	; if set, branch
